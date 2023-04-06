@@ -17,22 +17,31 @@ class GPTUser(HttpUser):
                 except JSONDecodeError as e:
                     print(e)
 
-    #@task
-    #def get_topic(self):
-    #    req_json = {'user_id': random.randint(1, 20)}
-    #    res = self.client.post('/get_all_topic', json=req_json, catch_response=True)
-    #    try:
-    #        if res.json()["return_code"] != 0:
-    #            res.failure("ReturnCode is not 0")
-    #    except JSONDecodeError as e:
-    #        print(e)
+    @task
+    def get_topic_list(self):
+        req_json = {'user_id': random.randint(1, 20)}
+        res = self.client.post('/get_all_topic', json=req_json, catch_response=True)
+        try:
+            if res.json()["return_code"] != 0:
+                res.failure("ReturnCode is not 0")
+        except JSONDecodeError as e:
+            print(e)
 
-    #@task
-    #def get_history(self):
-    #    req_json = {'user_id': random.randint(1, 20)}
-    #    res = self.client.post('/get_history', json=req_json, catch_response=True)
-    #    try:
-    #        if res.json()["return_code"] != 0:
-    #            res.failure("ReturnCode is not 0")
-    #    except JSONDecodeError as e:
-    #        print(e)
+    @task
+    def get_history(self):
+        user_id = random.randint(1, 20)
+        topic_list = self.get_user_topics(user_id)
+        for topic in topic_list:
+            req_json = {'user_id': user_id, 'topic_id': topic}
+            res = self.client.post('/get_history', json=req_json, catch_response=True)
+            try:
+                if res.json()["return_code"] != 0:
+                    res.failure("ReturnCode is not 0")
+            except JSONDecodeError as e:
+                print(e)
+
+    def get_user_topics(self, user_id):
+        res = self.client.post('/get_all_topic', json={'user_id': user_id}, catch_response=True)
+        if res.json()["return_code"] == 0:
+            return res.json()['topic_list']
+        return []
