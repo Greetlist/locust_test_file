@@ -17,7 +17,7 @@ class GPTUser(HttpUser):
                 except JSONDecodeError as e:
                     print(e)
 
-    @task
+    @task(4)
     def get_topic_list(self):
         req_json = {'user_id': random.randint(1, 20)}
         res = self.client.post('/get_all_topic', json=req_json, catch_response=True)
@@ -27,12 +27,12 @@ class GPTUser(HttpUser):
         except JSONDecodeError as e:
             print(e)
 
-    @task
+    @task(4)
     def get_history(self):
         user_id = random.randint(1, 20)
         topic_list = self.get_user_topics(user_id)
-        for topic in topic_list:
-            req_json = {'user_id': user_id, 'topic_id': topic}
+        for topic_info in topic_list:
+            req_json = {'user_id': user_id, 'topic_id': topic_info['topic_id']}
             res = self.client.post('/get_history', json=req_json, catch_response=True)
             try:
                 if res.json()["return_code"] != 0:
